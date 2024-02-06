@@ -1,0 +1,267 @@
+.home {
+    min-height: 100vh;
+    padding: 0 9% 2rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    animation:bg 5s ease-in-out ;
+    /* understand */
+}
+
+.content {
+    padding: 5%;
+    width: 50vw;
+    animation: an2 5s ease-in-out ;
+    /* background-color: var(--main2-color);  */
+}
+
+.content h1 {
+    color: var(--main2-color);
+    font-size: 6vw;
+    font-weight: 900;
+    margin-bottom: 1vh;
+    line-height: 1.3;
+    animation: an1 5s ease-in-out alternate infinite;
+}
+
+.content h3 {
+    /* margin-top:10vh; */
+    color: var(--main-color);
+    font-size: 3vw;
+    font-weight: 700;
+    margin-bottom: 1vh;
+    line-height: .5;
+    animation: hello 5s ease-in-out alternate infinite ;
+}
+
+
+.content h2 {
+    color: var(--main-color);
+    font-size: 3.5vw;
+    font-weight: 900;
+    
+}
+
+.content p {
+    color: var(--secondary-color);
+    font-size: 2vw;
+    font-weight: 700;
+    margin-bottom: 1vh;
+    animation: h2an 5s ease-in-out ;
+}
+
+.social a {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    width: 5rem;
+    height: 5rem;
+    background: transparent;
+    border: .2rem solid var(--secondary-color);
+    border-radius: 50%;
+    font-size: 2.5rem;
+    color: var(--secondary-color);
+    text-decoration: none;
+    margin: 3rem 2.5rem 3rem 0;
+    transition: .5s ease;
+
+}
+
+.social a:hover {
+    background: var(--main-color);
+    color: #fff;
+}
+
+.btn {
+    text-align: center;
+    display: inline-block;
+    padding: 1rem 2.8rem;
+    background: var(--main-color);
+    animation:btan 0.5s ease-in-out infinite alternate;
+    color: #fff;
+    font-size: 2rem;
+    font-weight: 600;
+    border-radius: 4rem;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 2);
+    text-decoration: none;
+    /* transition:0.5s ease */
+}
+
+.btn:hover {
+    background: var(--secondary-color);
+    color: var(--primary-color);
+}
+
+.img-banner {
+
+    transition: 2s;
+    animation: image 3s ease alternate infinite;
+}
+@keyframes an1 {
+    from {
+        color:var(--secondary-color);
+    }
+
+    to {
+        color:var(--main2-color);
+    }
+
+}
+@keyframes bg {
+    from {
+        background-color:var(--secondary-color)
+    }
+
+    to {
+        background-color:var(--primary-color);
+    }
+
+}
+@keyframes h2an {
+    from {
+        height:0;
+        font-size:0;
+
+    }
+
+    to {
+        font-size:2vw;
+        height:100%;
+        
+        
+    }
+
+}
+@keyframes h3an {
+    from {
+        height:0;
+        font-size:0;
+
+    }
+
+    to {
+        font-size:25px;
+        height:100%;
+        
+        
+    }
+
+}
+@keyframes hello {
+    from {
+        height:50%;
+        font-size:3vw;
+
+    }
+
+    to {
+        font-size:5vw;
+        height:100%;
+        
+        
+    }
+
+}
+
+@keyframes btan {
+    from {
+        background-color: var(--main-color);
+    }
+
+    to {
+        background-color:var(--main2-color);
+    }
+
+}
+@keyframes an2 {
+    from {
+        opacity:0
+    }
+
+    to {
+        opacity:1;
+    }
+
+}
+@keyframes image {
+    from {
+        height: 75%;
+        width: 75%;
+
+    }
+
+    to {
+        height: 100%;
+        width: 100%;
+    }
+
+}
+
+@media screen and (max-width: 600px) {
+
+
+    .home {
+        flex-direction: column-reverse;
+    }
+
+    /* .img-banner{
+        margin-top:70%;
+    } */
+
+    .content {
+        min-width: 100%;
+
+    }
+
+    .content h1 {
+        color: var(--main2-color);
+        font-size: 50px;
+        text-align: center;
+        font-weight: 900;
+        margin-bottom: 1vh;
+        line-height: 1.3;
+    }
+
+    .content h3 {
+        /* margin-top:10vh; */
+        color: var(--main-color);
+        font-size: 25px;
+        font-weight: 700;
+        margin-bottom: 1vh;
+        line-height: .5;
+        animation:none
+    }
+
+    .content h2 {
+        color: var(--main-color);
+        font-size: 35px;
+        font-weight: 900;
+    }
+
+    .content p {
+        color: var(--secondary-color);
+        font-size: 25px;
+        font-weight: 700;
+        margin-bottom: 1vh;
+        margin-top: 20px;
+        animation:h3an 5s ease;
+    }
+
+    .social a {
+        display: inline-flex;
+        justify-content: center;
+        align-items: center;
+        width: 4rem;
+        height: 4rem;
+        background: transparent;
+        border: .2rem solid var(--secondary-color);
+        border-radius: 50%;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 2);
+        font-size: 2.5rem;
+        color: var(--secondary-color);
+        text-decoration: none;
+        margin: 3rem 1rem 5rem 1rem;
+        transition: .5s ease;
+
+    }
+}
