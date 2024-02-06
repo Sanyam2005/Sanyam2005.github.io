@@ -1,0 +1,234 @@
+:root{
+    --primary-color:#fff;
+    --secondary-color:#333;
+    --main-color:#fd1760;
+    --main2-color:#880D1E;
+    --nav-color:#24252A;
+    --bg:beige;
+    --bg2:#CEBFF3;
+}
+.dark-mode{
+    --primary-color:#191919;
+    --secondary-color:#fff;
+    --main-color:#E3651D;
+    --main2-color:#0ef;
+    --bg:#494D60;
+    --bg2:var(--nav-color);
+}
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: var(--primary-color);
+}
+.heading{
+    text-align:center;
+    font-size:5rem;
+    font-weight:800;
+     margin-top:3% 
+}
+h3{
+    font-size: 35px;
+    text-decoration: underline dotted;
+    text-align:center;
+}
+.blog1:hover,.blog2:hover{
+    background-color: var(--main-color);
+    color: var(--primary-color);
+    cursor: pointer;
+
+}
+
+.comment,.comment2{
+    font-size: 35px;
+}
+h1{
+    font-size: 40px;
+}
+.input_section{
+    margin-top:10px;
+    display: flex;
+    background-color: beige;
+    flex-direction: row;
+    justify-content: center;
+    align-items:center;
+}
+.comments-sec {
+    max-width: 70%;
+    margin: 20px;
+    padding: 20px;
+    /* border: 5px solid var(--secondary-color); */
+    /* background-color:var(--bg);
+    border-radius: 5px; */
+}
+.blogsec a{
+    text-decoration: none;
+    color: var(--secondary-color);
+
+}
+.comments-sec #comment,#comment2{
+    font-size:20px;
+    padding:10px;
+    width:100%;
+    background: transparent;
+}
+header {
+    background-color: #333;
+    color: white;
+    font-size: 40px;
+    text-align: center;
+    padding: 20px;
+    border: 0;
+    margin: 0;
+}
+.blog1,.blog2{
+    margin-top:2rem;
+    padding:10px;
+    border: 10px solid var(--main-color);
+}
+.info{
+    margin-left: 10px;
+    position: relative;
+    padding:20px;
+    
+    margin: 2px;
+    font-size: 30px;
+}
+.comment-list{
+    padding:2px;
+    line-height:1.2;
+    margin: 2px;
+    font-size: 20px;
+}
+button,.blogsec a{
+    text-align:center;
+    display:inline-block;
+    padding:1rem 2.8rem;
+    background:var(--main-color);
+    margin-left:auto;
+    margin-right:auto;
+    color:#fff;
+    font-size:2rem;
+    font-weight:600;
+    border-radius:4rem;
+    box-shadow:0 2px 5px rgba(0,0,0,2);
+    text-decoration: none;
+}
+.blogsec{
+    margin-top:2rem;
+    padding:10px;
+   display:flex;
+   flex-direction:column;
+   align-items:center;
+   justify-content: center;
+}
+button:hover,.blogsec a:hover{
+    background:var(--secondary-color);
+    color:var(--primary-color);
+}
+.input_section{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+}
+#like-section ,#like-section2,p{
+    text-align: center;
+
+}
+ #like-button,#like-button2,p{
+    
+    
+    
+    border: none;
+    
+    font-size: 40px;
+   
+}
+#like-count,#like-count2 {
+    font-size: 50px;
+    margin-left: 10px;
+}
+@media screen and (max-width: 600px)
+{
+    #like-button,#like-button2{
+    
+        border: none;
+        font-size: 40px;
+        margin-top: 50%;
+        margin-right:10%;
+    }
+    .blog1,.blog2{
+        margin-left:auto;
+        margin-right:auto;
+        border:none;
+    }
+    .comments-sec {
+        max-width: 60%;
+        margin: 20px;
+        padding: 20px;
+        /* border: 5px solid var(--secondary-color); */
+        /* background-color:var(--bg);
+        border-radius: 5px; */
+    }
+    .comment-list{
+        padding:2px;
+        line-height:1.2;
+        margin: 2px;
+        font-size: 15px;
+    }
+
+.input_section{
+    margin-top:10px;
+    
+    flex-direction: row;
+    
+}
+.info{
+    margin-left: 5px;
+    position: relative;
+    margin: 2px;
+    font-size: 18px;
+}
+h4{
+    font-size: 20px;
+}
+h3{
+    font-size: 20px;
+}
+
+.comment,.comment2{
+    font-size: 15px;
+}
+button{
+    text-align:center;
+    display:inline-block;
+    padding:1rem 2.8rem;
+    background:var(--main-color);
+    margin-left:auto;
+    margin-right:auto;
+    color:#fff;
+    font-size:1.2rem;
+    font-weight:600;
+    border-radius:4rem;
+    box-shadow:0 2px 5px rgba(0,0,0,2);
+    text-decoration: none;
+    
+    
+    
+   
+}
+h1{
+    font-size: 20px;
+}
+p{
+    font-size:20px
+}
+#like-button ,#like-button2{
+    font-size: 20px;
+    margin-top: 100%;
+}
+#like-count,#like-count2 {
+    font-size: 20px;
+    margin-left: 5px;
+}
+}

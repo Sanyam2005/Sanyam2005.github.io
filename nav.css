@@ -1,0 +1,100 @@
+*{
+    margin: 0;
+    padding:0;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+}
+:root{
+    --primary-color:#fff;
+    --secondary-color:#333;
+    --main-color:#fd1760;
+    --main2-color:#880D1E;
+    --nav-color:#24252A;
+}
+.dark-mode{
+    --primary-color:#191919;
+    --secondary-color:#fff;
+    --main-color:#E3651D;
+    --main2-color:#0ef;
+}
+html{
+    font-size:62.5%;
+    /* overflow-x:hidden; */
+}
+body {
+    
+    background:var(--primary-color);
+    color: var(--secondary-color);
+}
+.header{
+    position:relative;
+    top:0;
+    left:0;
+    width:100%;
+    padding:2rem 9%;
+    background-color:var(--nav-color);
+    display:flex; 
+    justify-content: space-between; 
+    align-items: center;
+    z-index:100;
+    
+}
+.logo{
+    /* background-image: url("new-logo-sanyam.png");
+    background-size: cover; */
+     width:12%; 
+    height:10%;
+    /* font-size:2.5rem; */
+    color:var(--secondary-color);
+    /* cursor:default; */
+    margin-right:auto;
+    /* text-decoration: none; */
+}
+.navbar a{
+    text-decoration: none;
+    position:relative;
+    font-size:2rem;
+    font-weight:500;
+    color: #fff;
+}
+.nav-item{
+    list-style-type: none;
+    display:inline;
+    margin-left:4rem;
+    
+}
+.navbar a.active{
+    color:#EA534D;
+}
+.navbar a:hover{
+    color:#EA534D;
+}
+.toggle{
+    margin-left:3.5rem;
+    /* background-color: tomato; */
+    cursor: pointer;
+    /* margin-top: 1px; */
+}
+.toggle .toggle-icon{
+    font-size: 24px;
+    color:#fff;
+}
+@media screen and (max-width: 600px) {
+    .header {
+        flex-direction: column;
+        padding: 1rem;
+    }
+
+    .navbar a {
+        font-size: 1.5rem;
+        display:flex;
+        flex-direction: column;
+        padding: 0.5rem 0;
+        
+    }
+    .logo{
+        display:none;
+    }
+    
+    
+}
