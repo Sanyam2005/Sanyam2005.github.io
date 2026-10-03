@@ -1,0 +1,45 @@
+name: Deploy to GitHub Pages
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+concurrency:
+  group: pages
+  cancel-in-progress: true
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    outputs:
+      ready: ${{ steps.unpack.outputs.ready }}
+    steps:
+      - uses: actions/checkout@v5
+      - name: Unpack site.zip into source files (first deploy only)
+        id: unpack
+        run: |
+          if [ -f site.zip ]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898283+github-actions[bot]@users.noreply.github.com"
+            mkdir -p /tmp/site && unzip -q site.zip -d /tmp/site
+            git rm -r -q -- . ':!.github'
+            cp -r /tmp/site/. .
+            git add -A
+            git commit -m "Unpack portfolio source"
+            git push
+          fi
+          if [ -f package.json ] && [ -f astro.config.mjs ]; then echo "ready=true" >> "$GITHUB_OUTPUT"; else echo "No site source yet, skipping build."; fi
+      - uses: withastro/action@v6
+        if: steps.unpack.outputs.ready == 'true'
+  deploy:
+    needs: build
+    if: needs.build.outputs.ready == 'true'
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v5
