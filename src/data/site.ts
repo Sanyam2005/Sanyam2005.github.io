@@ -8,7 +8,7 @@ export type Link = { label: string; href: string };
 export const site = {
   url: 'https://sanyam2005.github.io',
   name: 'Sanyam Agrawal',
-  title: 'Sanyam Agrawal, software and ML engineer',
+  title: 'Sanyam Agrawal | Software & ML Engineer, IIIT Hyderabad',
   description:
     'Sanyam Agrawal builds distributed systems, ML models and trading infrastructure. Final-year CS at IIIT Hyderabad; interned at Microsoft and Silverleaf Capital.',
   intro:
