@@ -1,0 +1,423 @@
+---
+import Base from '../layouts/Base.astro';
+import { site, roles, work, projects, honours, skills } from '../data/site';
+import { videoOf, logoOf } from '../data/media';
+import ProjectArt from '../components/ProjectArt.astro';
+
+const featuredOrder = ['transformers-from-scratch', 'nutri-ai', 'rollout-allocation', 'legal-precedent-retrieval', 'network-file-system', 'iiit-mart', 'teleprompter', 'wandermate', 'operating-systems', 'crowd-monitoring', 'citiverse'];
+const rank = (slug: string) => { const i = featuredOrder.indexOf(slug); return i < 0 ? 99 : i; };
+const live = projects.filter((p) => !p.draft).sort((a, b) => rank(a.slug) - rank(b.slug));
+const ghostName: Record<string, string> = { 'transformers-from-scratch': 'Transformers', 'rollout-allocation': 'RL rollouts', 'legal-precedent-retrieval': 'Legal IR', 'network-file-system': 'NFS', 'operating-systems': 'OS in C', 'crowd-monitoring': 'Edge vision' };
+const hasPage = (p: (typeof live)[number]) => Boolean(p.page || videoOf(p));
+const ref = (id: string) => {
+  if (id === 'codeforces') return { label: 'competitive programming', href: site.codeforces };
+  const w = work.find((x) => x.id === id);
+  if (w) return { label: w.org, href: `#w-${w.id}`, tab: 'experience' };
+  const p = live.find((x) => x.slug === id);
+  if (p) return { label: p.title, href: hasPage(p) ? `/projects/${p.slug}/` : `#p-${p.slug}`, tab: 'projects' };
+  return null;
+};
+const skillData = skills.map((g) => ({ ...g, items: g.items.map((s) => ({ name: s.name, used: s.in.map(ref).filter(Boolean) })) }));
+const linkedinShort = site.linkedin.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '');
+const tabs = [
+  { id: 'projects', label: 'Projects', cmd: 'ls ~/projects' },
+  { id: 'experience', label: 'Experience', cmd: 'cd ~/experience' },
+  { id: 'skills', label: 'Skills', cmd: 'cat skills.txt' },
+  { id: 'contact', label: 'Contact', cmd: 'mail sanyam' },
+];
+const plainForm = site.formEndpoint.replace('/ajax/', '/');
+const ext = '<svg class="ext" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M6 3h7v7M13 3 4 12"/></svg>';
+---
+<Base>
+  <canvas id="bg" aria-hidden="true"></canvas>
+  <div class="shell">
+    <aside class="intro">
+      <div>
+        <h1>Sanyam Agrawal</h1>
+        <p class="term" aria-hidden="true"><span id="cmd">&gt; whoami</span><span class="cur"></span></p>
+        <p class="sr-only">Software engineer working on machine learning and quantitative systems.</p>
+      </div>
+      <nav class="tabs" aria-label="Sections">
+        {tabs.map((t) => <a href={`#${t.id}`} data-tab={t.id} data-cmd={t.cmd}>{t.label}</a>)}
+      </nav>
+      <p class="bio">
+        Final-year computer science student at IIIT Hyderabad, interested in software engineering, quantitative development and machine learning.
+        <br /><br />
+        I like problems where correctness is measurable: a backtest that has to match live trading, an ablation that changes one thing at a time, a file system that keeps working when a server dies. Off the clock, I'm a Codeforces Expert.
+      </p>
+      <div class="social">
+        <a class="pill" href={site.github} rel="me">GitHub <Fragment set:html={ext} /></a>
+        <a class="pill" href={site.linkedin} rel="me">LinkedIn <Fragment set:html={ext} /></a>
+        <a class="pill" href={site.resume}>Résumé <Fragment set:html={ext} /></a>
+        <a class="pill" href={`mailto:${site.email}`}>Email <Fragment set:html={ext} /></a>
+      </div>
+    </aside>
+
+    <main id="main" class="content">
+      <section id="projects" class="panel" aria-labelledby="h-projects">
+        <h2 id="h-projects" class="sr-only">Projects</h2>
+        <div class="filter" role="group" aria-label="Filter projects by area">
+          <button type="button" class="pill" data-area="all" aria-pressed="true">All</button>
+          {roles.map((r) => <button type="button" class="pill" data-area={r.id} aria-pressed="false">{r.label}</button>)}
+        </div>
+        {live.map((p) => (
+          <article class="card" id={`p-${p.slug}`} data-w={p.w.join(',')} data-ghost={ghostName[p.slug] ?? p.title}>
+            {<a class="media art-wrap" href={hasPage(p) ? `/projects/${p.slug}/` : p.links[0]?.href} tabindex="-1" aria-hidden="true"><ProjectArt slug={p.slug} title={p.title} /></a>}
+            <div class="body">
+              <div class="row">
+                <div class="left"><h3>{p.title}</h3>{p.status && <span class="pill hi">{p.status}</span>}</div>
+                <div class="right">
+                  {p.links.map((l) => <a class="pill" href={l.href}>{l.label} <Fragment set:html={ext} /></a>)}
+                  {hasPage(p) && <a class="pill" href={`/projects/${p.slug}/`}>Details</a>}
+                </div>
+              </div>
+              <p class="desc">{p.impact}</p>
+              {p.stack.length > 0 && <div class="row"><div class="left">{p.stack.map((t) => <span class="pill tech">{t}</span>)}</div></div>}
+            </div>
+          </article>
+        ))}
+      </section>
+
+      <section id="experience" class="panel" aria-labelledby="h-experience">
+        <h2 id="h-experience" class="sr-only">Experience</h2>
+        {work.map((x) => (
+          <article class:list={['card', { featured: x.featured }]} id={`w-${x.id}`} data-ghost={x.org}>
+            {logoOf(x.id)
+              ? <div class="plate logo-plate"><img class="logo" src={logoOf(x.id)} alt={`${x.org} logo`} /><small>{x.org}{x.where && `, ${x.where}`}</small></div>
+              : <div class="plate" aria-hidden="true"><div><span class="org">{x.org}</span><small>{x.where || 'Remote'}</small></div></div>}
+            <div class="body">
+              <div class="row">
+                <div class="left"><h3>{x.role}</h3></div>
+                <div class="right">{x.badge && <span class="pill hi">{x.badge}</span>}{x.when && <span class="pill tech">{x.when}</span>}</div>
+              </div>
+              <ul class="points">{x.impact.map((t) => <li>{t}</li>)}</ul>
+              {(x.stack?.length || x.links) && (
+                <div class="row">
+                  <div class="left">{x.stack?.map((t) => <span class="pill tech">{t}</span>)}</div>
+                  <div class="right">{x.links?.map((l) => <a class="pill" href={l.href}>{l.label} <Fragment set:html={ext} /></a>)}</div>
+                </div>
+              )}
+            </div>
+          </article>
+        ))}
+        <article class="card" data-ghost="Achievements">
+          <div class="body">
+            <h3>Achievements</h3>
+            <dl class="rows">
+              {honours.map((h) => <div><dt>{h.what}</dt><dd>{h.href ? <a href={h.href}>{h.detail}</a> : h.detail}</dd></div>)}
+              <div><dt>Education</dt><dd>B.Tech computer science, IIIT Hyderabad, 2023 to 2027. CGPA 9.09.</dd></div>
+            </dl>
+          </div>
+        </article>
+      </section>
+
+      <section id="skills" class="panel" aria-labelledby="h-skills">
+        <h2 id="h-skills" class="sr-only">Skills</h2>
+        <p class="hint">Select a skill to see where I used it.</p>
+        <div class="skills" data-skills>
+          {skillData.map((g, gi) => (
+            <article class="card" style={`--g:${gi}`} data-ghost={g.group.split(" ")[0]}>
+              <div class="body">
+                <h3>{g.group}</h3>
+                <div class="chips">
+                  {g.items.map((k, j) => (
+                    <button type="button" class="pill chip" style={`--i:${j}`} aria-pressed="false" aria-controls={`sd-${gi}`} data-used={JSON.stringify(k.used)}>{k.name}</button>
+                  ))}
+                </div>
+                <p class="sd" id={`sd-${gi}`} aria-live="polite"></p>
+              </div>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section id="contact" class="panel" aria-labelledby="h-contact">
+        <h2 id="h-contact" class="sr-only">Contact</h2>
+        <article class="card" data-ghost="Hello">
+          <div class="body">
+            <h3>Get in touch</h3>
+            <dl class="rows">
+              <div><dt>Email</dt><dd><a href={`mailto:${site.email}`}>{site.email}</a></dd></div>
+              <div><dt>LinkedIn</dt><dd><a href={site.linkedin} rel="me">{linkedinShort}</a></dd></div>
+              <div><dt>GitHub</dt><dd><a href={site.github} rel="me">github.com/Sanyam2005</a></dd></div>
+              <div><dt>Résumé</dt><dd><a href={site.resume}>View on Google Drive</a></dd></div>
+            </dl>
+          </div>
+        </article>
+        {site.formEndpoint && (
+          <article class="card" data-ghost="Message">
+            <form class="body form" id="contact-form" action={plainForm} method="POST" data-ajax={site.formEndpoint}>
+              <h3>Send a message</h3>
+              <p class="desc">Optional. It goes straight to my inbox and I reply by email.</p>
+              <input type="hidden" name="_subject" value="New message from your portfolio" />
+              <input type="hidden" name="_template" value="table" />
+              <input type="hidden" name="_captcha" value="false" />
+              <input type="hidden" name="_next" value={new URL('/thanks/', site.url).href} />
+              <input type="text" name="_honey" tabindex="-1" autocomplete="off" class="sr-only" aria-hidden="true" />
+              <label>Name<input name="name" type="text" autocomplete="name" required /></label>
+              <label>Email<input name="email" type="email" autocomplete="email" required placeholder="you@company.com" /></label>
+              <label>Message<textarea name="message" rows="5" required></textarea></label>
+              <div class="row"><button class="pill send" type="submit">Send message</button><span class="status" role="status"></span></div>
+            </form>
+          </article>
+        )}
+      </section>
+
+      <p class="foot">Sanyam Agrawal, Hyderabad</p>
+    </main>
+  </div>
+</Base>
+
+<style>
+  #bg { position: fixed; inset: 0; width: 100vw; height: 100vh; z-index: 0; pointer-events: none; }
+  .shell { position: relative; z-index: 1; max-width: 1360px; margin: 0 auto; padding: 0 48px; display: grid; grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr); gap: 72px; }
+  .intro { position: sticky; top: 0; height: 100vh; display: flex; flex-direction: column; gap: 36px; padding: 64px 0 40px; }
+  h1 { font-size: clamp(38px, 4.4vw, 58px); font-weight: 700; letter-spacing: -0.03em; line-height: 1.02; }
+  .term { margin-top: 14px; font: 400 clamp(19px, 2vw, 26px)/1.3 var(--mono); color: var(--ink); min-height: 1.3em; }
+  .cur { display: inline-block; width: 0.55em; height: 1.05em; margin-left: 4px; vertical-align: -0.15em; background: var(--ink); animation: blink 1.05s steps(1) infinite; }
+  @keyframes blink { 50% { opacity: 0; } }
+  .tabs { display: grid; gap: 10px; max-width: 520px; }
+  .tabs a { display: block; text-align: center; padding: 9px 0; border-radius: 999px; border: 1px solid var(--line-2); background: rgba(255, 255, 255, 0.04); color: var(--ink); text-decoration: none; font: 500 17px/1.2 var(--mono); transition: background 0.2s, border-color 0.2s; backdrop-filter: blur(2px); }
+  .tabs a:hover { background: rgba(255, 255, 255, 0.09); }
+  .tabs a[aria-current='true'] { background: rgba(255, 255, 255, 0.14); border-color: rgba(255, 255, 255, 0.4); }
+  .bio { font: 400 15px/1.7 var(--mono); color: var(--ink-2); max-width: 30em; margin-top: auto; }
+  .social { display: flex; flex-wrap: wrap; gap: 8px; }
+
+  .content { padding: 64px 0 64px; min-width: 0; }
+  .panel { display: grid; gap: 20px; scroll-margin-top: 24px; }
+  .panel + .panel { margin-top: 56px; }
+  :global(.js) .panel:not(.active) { display: none; }
+  :global(.js) .panel + .panel { margin-top: 0; }
+  .filter { display: flex; flex-wrap: wrap; gap: 8px; }
+  .filter .pill { cursor: pointer; }
+  .filter .pill[aria-pressed='true'], .chip[aria-pressed='true'] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+  .card[hidden] { display: none; }
+  .card.featured { border-color: rgba(124, 196, 255, 0.4); }
+  .plate .org { font-family: var(--sans); font-weight: 700; font-size: clamp(26px, 3.4vw, 38px); letter-spacing: -0.02em; }
+  .card.featured .plate { background-color: #10202f; }
+  .art-wrap { display: flex; align-items: center; justify-content: center; background-color: var(--card-2); background-image: radial-gradient(rgba(255, 255, 255, 0.07) 1px, transparent 1.2px); background-size: 14px 14px; }
+  .art-wrap :global(.art) { width: 92%; height: 88%; }
+  .logo-plate { flex-direction: column; align-items: flex-start; justify-content: flex-end; gap: 12px; }
+  .logo-plate .logo { max-height: 56px; max-width: 60%; width: auto; object-fit: contain; }
+  .logo-plate small { font: 400 13px/1.4 var(--mono); color: var(--ink-3); }
+
+  .rows { margin: 4px 0 0; }
+  .rows div { display: grid; grid-template-columns: 170px minmax(0, 1fr); gap: 12px; padding: 10px 0; border-top: 1px solid var(--line); font-size: 15px; }
+  .rows dt { color: var(--ink-3); }
+  .rows dd { margin: 0; color: var(--ink); overflow-wrap: anywhere; }
+
+  .hint { color: var(--ink-3); font: 400 14px/1.5 var(--mono); }
+  .skills { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip { cursor: pointer; height: 32px; font-size: 14px; transition: background 0.2s, color 0.2s, border-color 0.2s, opacity 0.45s ease, transform 0.45s cubic-bezier(0.2, 0.8, 0.2, 1); }
+  .chip:hover { border-color: var(--line-2); }
+  :global(.js) .skills:not(.in) .chip { opacity: 0; transform: translateY(10px) scale(0.96); }
+  .skills.in .chip:not(.settled) { transition-delay: calc(var(--g) * 120ms + var(--i) * 45ms); }
+  .sd { font-size: 14px; color: var(--ink-2); min-height: 1.4em; }
+  .sd.show { animation: sd-in 0.3s ease; }
+  @keyframes sd-in { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+
+  .form label { display: grid; gap: 6px; font-size: 14px; color: var(--ink-2); }
+  .form input, .form textarea { width: 100%; font: 400 15px/1.5 var(--sans); color: var(--ink); background: var(--card-2); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; }
+  .form input:focus, .form textarea:focus { outline: 2px solid var(--accent); outline-offset: 0; border-color: transparent; }
+  .send { height: 36px; padding: 0 16px; background: var(--ink); color: var(--bg); border-color: var(--ink); cursor: pointer; font-size: 14px; }
+  .send:hover { opacity: 0.9; }
+  .status { font-size: 14px; color: var(--ink-2); }
+  .foot { margin-top: 40px; color: var(--ink-3); font: 400 13px/1 var(--mono); }
+
+  @media (max-width: 960px) {
+    .shell { grid-template-columns: 1fr; gap: 0; padding: 0 20px; }
+    .intro { position: static; height: auto; padding: 40px 0 24px; gap: 24px; }
+    .tabs { grid-template-columns: repeat(2, 1fr); }
+    .bio { margin-top: 0; }
+    .content { padding-top: 8px; }
+    .skills { grid-template-columns: 1fr; }
+    .rows div { grid-template-columns: 1fr; gap: 2px; }
+  }
+  @media (prefers-reduced-motion: reduce) { .cur { animation: none; } :global(.js) .skills:not(.in) .chip { opacity: 1; transform: none; } }
+</style>
+
+<script is:inline define:vars={{ ids: roles.map((r) => r.id) }}>
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* Typed terminal line */
+  const cmdEl = document.getElementById('cmd');
+  let typing;
+  function type(text) {
+    clearInterval(typing);
+    if (reduce) { cmdEl.textContent = '> ' + text; return; }
+    let i = 0; cmdEl.textContent = '> ';
+    typing = setInterval(() => { cmdEl.textContent = '> ' + text.slice(0, ++i); if (i >= text.length) clearInterval(typing); }, 45);
+  }
+
+  /* Tabs: one panel at a time, remembered in the URL hash */
+  const tabLinks = [...document.querySelectorAll('[data-tab]')];
+  const panels = [...document.querySelectorAll('.panel')];
+  const skillsBox = document.querySelector('[data-skills]');
+  function openTab(id, animate) {
+    if (!panels.some((p) => p.id === id)) id = 'projects';
+    panels.forEach((p) => p.classList.toggle('active', p.id === id));
+    tabLinks.forEach((a) => a.setAttribute('aria-current', String(a.dataset.tab === id)));
+    const link = tabLinks.find((a) => a.dataset.tab === id);
+    if (animate) type(link.dataset.cmd);
+    if (id === 'skills' && skillsBox && !skillsBox.classList.contains('in')) {
+      requestAnimationFrame(() => requestAnimationFrame(() => skillsBox.classList.add('in')));
+      setTimeout(() => skillsBox.querySelectorAll('.chip').forEach((c) => c.classList.add('settled')), 1800);
+    }
+  }
+  tabLinks.forEach((a) => a.addEventListener('click', (e) => {
+    e.preventDefault();
+    history.replaceState(null, '', location.pathname + location.search + '#' + a.dataset.tab);
+    openTab(a.dataset.tab, true);
+    if (innerWidth < 960) document.getElementById(a.dataset.tab).scrollIntoView({ behavior: reduce ? 'auto' : 'smooth' });
+    else scrollTo({ top: 0, behavior: reduce ? 'auto' : 'smooth' });
+  }));
+  // Links elsewhere on the page (skill evidence) that point at a card in another tab.
+  document.addEventListener('click', (e) => {
+    const a = e.target.closest('a[href^="#"]');
+    if (!a || a.dataset.tab) return;
+    const target = document.querySelector(a.getAttribute('href'));
+    const panel = target && target.closest('.panel');
+    if (!panel) return;
+    e.preventDefault();
+    openTab(panel.id, true);
+    target.hidden = false;
+    target.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'center' });
+  });
+  const start = (location.hash || '#projects').slice(1);
+  openTab(start, false);
+  setTimeout(() => type('whoami'), 300);
+
+  /* Project filter */
+  const filterBtns = document.querySelectorAll('.filter button');
+  const projCards = document.querySelectorAll('#projects .card');
+  function show(area) {
+    const i = ids.indexOf(area);
+    filterBtns.forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.area === (i < 0 ? 'all' : area))));
+    projCards.forEach((el) => { el.hidden = i >= 0 && Number(el.dataset.w.split(',')[i]) < 0.5; });
+    const u = new URL(location.href);
+    i < 0 ? u.searchParams.delete('for') : u.searchParams.set('for', area);
+    history.replaceState(null, '', u);
+  }
+  filterBtns.forEach((b) => b.addEventListener('click', () => show(b.dataset.area)));
+  const q = new URLSearchParams(location.search).get('for');
+  if (q && ids.includes(q)) show(q);
+
+  /* Skills: click a chip to see where it was used */
+  document.querySelectorAll('.chip').forEach((chip) => chip.addEventListener('click', () => {
+    const card = chip.closest('.card');
+    const out = card.querySelector('.sd');
+    const on = chip.getAttribute('aria-pressed') !== 'true';
+    card.querySelectorAll('.chip').forEach((c) => c.setAttribute('aria-pressed', 'false'));
+    out.classList.remove('show'); out.textContent = '';
+    if (!on) return;
+    chip.setAttribute('aria-pressed', 'true');
+    const used = JSON.parse(chip.dataset.used);
+    out.append('Used in ');
+    used.forEach((u, k) => {
+      const a = document.createElement('a'); a.href = u.href; a.textContent = u.label; out.append(a);
+      if (k < used.length - 1) out.append(k === used.length - 2 ? ' and ' : ', ');
+    });
+    out.append('.');
+    void out.offsetWidth; out.classList.add('show');
+  }));
+
+  /* Contact form: send in place, fall back to email on failure */
+  const form = document.getElementById('contact-form');
+  if (form) form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const status = form.querySelector('.status');
+    const btn = form.querySelector('.send');
+    btn.disabled = true; status.textContent = 'Sending…';
+    try {
+      const res = await fetch(form.dataset.ajax, { method: 'POST', headers: { Accept: 'application/json' }, body: new FormData(form) });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || String(data.success) === 'false') throw new Error(data.message || 'failed');
+      form.reset(); status.textContent = 'Message sent. I will reply by email.';
+    } catch {
+      status.textContent = 'That didn\u2019t go through. Please email sanyamagrawal2005@gmail.com instead.';
+    } finally { btn.disabled = false; }
+  });
+
+  /* Background: a field of dots with a slow wave; hovering a card writes its name into the dots */
+  const cv = document.getElementById('bg');
+  const ctx = cv.getContext('2d');
+  const gap = 7;
+  let W, H, dpr, mask = null, maskW = 0, ghost = '', t0 = performance.now(), raf, last = 0;
+  const off = document.createElement('canvas');
+  const octx = off.getContext('2d', { willReadFrequently: true });
+  function size() {
+    dpr = Math.min(devicePixelRatio || 1, 2);
+    W = innerWidth; H = innerHeight;
+    cv.width = W * dpr; cv.height = H * dpr;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    buildMask();
+    if (reduce) draw(0);
+  }
+  function buildMask() {
+    mask = null;
+    if (!ghost || innerWidth < 960) return;
+    const cols = Math.ceil(W / gap), rows = Math.ceil(H / gap);
+    off.width = cols; off.height = rows;
+    octx.clearRect(0, 0, cols, rows);
+    octx.fillStyle = '#fff';
+    const leftW = document.querySelector('.tabs').getBoundingClientRect().width / gap;
+    // Largest size at which the label fits the left column on at most two lines.
+    let fs = 15, lines = [];
+    for (; fs >= 7; fs--) {
+      octx.font = `700 ${fs}px "IBM Plex Sans", sans-serif`;
+      lines = []; let line = '';
+      for (const w of ghost.split(' ')) {
+        const test = line ? line + ' ' + w : w;
+        if (octx.measureText(test).width > leftW && line) { lines.push(line); line = w; } else line = test;
+      }
+      lines.push(line);
+      if (lines.length <= 2 && lines.every((l) => octx.measureText(l).width <= leftW)) break;
+    }
+    const x0 = Math.max(0, (W - Math.min(W, 1360)) / 2 / gap) + 48 / gap;
+    octx.textBaseline = 'middle';
+    const lh = Math.round(fs * 1.05);
+    const tabsEl = document.querySelector('.tabs'), bioEl = document.querySelector('.bio');
+    const mid = ((tabsEl.getBoundingClientRect().bottom + bioEl.getBoundingClientRect().top) / 2) / gap;
+    const y0 = Math.round(mid - ((lines.length - 1) * lh) / 2);
+    lines.forEach((l, k) => octx.fillText(l, x0, y0 + k * lh));
+    mask = octx.getImageData(0, 0, cols, rows).data; maskW = cols;
+  }
+  function draw(time) {
+    const t = (time - t0) / 1000;
+    ctx.clearRect(0, 0, W, H);
+    const cols = Math.ceil(W / gap), rows = Math.ceil(H / gap);
+    const sx = new Float32Array(cols), cy = new Float32Array(rows);
+    for (let c = 0; c < cols; c++) sx[c] = Math.sin(c * 0.055 + t * 0.6);
+    for (let r = 0; r < rows; r++) cy[r] = Math.cos(r * 0.045 - t * 0.45);
+    // Draw dots in a few alpha buckets so fillStyle changes rarely.
+    const buckets = [[], [], [], []];
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < cols; c++) {
+        if (mask && mask[(r * maskW + c) * 4 + 3] > 70) { buckets[3].push(c, r); continue; }
+        const w = (sx[c] * cy[r] + 1) / 2;
+        if ((c + r) % 2) continue; // checkerboard keeps the field light
+        buckets[w > 0.66 ? 2 : w > 0.33 ? 1 : 0].push(c, r);
+      }
+    }
+    const styles = [[0.05, 1.1], [0.085, 1.3], [0.13, 1.5], [0.42, 4]];
+    buckets.forEach((b, k) => {
+      const [a, s] = styles[k];
+      ctx.fillStyle = `rgba(255,255,255,${a})`;
+      for (let i = 0; i < b.length; i += 2) ctx.fillRect(b[i] * gap + gap / 2 - s / 2, b[i + 1] * gap + gap / 2 - s / 2, s, s);
+    });
+  }
+  function loop(time) {
+    raf = requestAnimationFrame(loop);
+    if (time - last < 33) return; last = time; draw(time);
+  }
+  addEventListener('resize', size);
+  document.addEventListener('visibilitychange', () => { if (document.hidden) cancelAnimationFrame(raf); else if (!reduce) raf = requestAnimationFrame(loop); });
+  document.querySelectorAll('[data-ghost]').forEach((el) => {
+    el.addEventListener('mouseenter', () => { ghost = el.dataset.ghost; buildMask(); if (reduce) draw(0); });
+    el.addEventListener('mouseleave', () => { ghost = ''; mask = null; if (reduce) draw(0); });
+  });
+  (document.fonts ? document.fonts.ready : Promise.resolve()).then(size);
+  size();
+  if (!reduce) raf = requestAnimationFrame(loop);
+</script>

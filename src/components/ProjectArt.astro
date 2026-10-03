@@ -1,0 +1,174 @@
+---
+// Original line illustrations for project cards that have no screenshot.
+// Deterministic (seeded) so the build is stable.
+interface Props { slug: string; title: string }
+const { slug, title } = Astro.props;
+const W = 1200, H = 520;
+let seed = [...slug].reduce((a, c) => (a * 31 + c.charCodeAt(0)) >>> 0, 7);
+const rnd = () => { seed = (seed + 0x6d2b79f5) >>> 0; let t = seed; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+const S = 'rgba(237,237,238,0.55)', S2 = 'rgba(237,237,238,0.22)', A = '#7cc4ff';
+const el: string[] = [];
+const line = (x1: number, y1: number, x2: number, y2: number, c = S2, w = 2, dash = '') => el.push(`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${c}" stroke-width="${w}"${dash ? ` stroke-dasharray="${dash}"` : ''}/>`);
+const rect = (x: number, y: number, w: number, h: number, c = S, r = 10, fill = 'none', sw = 2) => el.push(`<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${r}" fill="${fill}" stroke="${c}" stroke-width="${sw}"/>`);
+const circ = (x: number, y: number, r: number, c = S, fill = 'none', sw = 2) => el.push(`<circle cx="${x}" cy="${y}" r="${r}" fill="${fill}" stroke="${c}" stroke-width="${sw}"/>`);
+const text = (x: number, y: number, t: string, c = S, size = 22, anchor = 'start') => el.push(`<text x="${x}" y="${y}" fill="${c}" font-size="${size}" font-family="IBM Plex Mono, monospace" text-anchor="${anchor}">${t}</text>`);
+
+switch (slug) {
+  case 'transformers-from-scratch': {
+    // Encoder and decoder stacks joined by cross-attention, with a rotary embedding drawn as a rotated query vector.
+    const blocks = (x: number, label: string) => {
+      rect(x, 60, 230, 400, S, 16);
+      text(x + 115, 95, label, S, 18, 'middle');
+      ['attention', 'norm', 'feed-forward', 'norm'].forEach((b, i) => {
+        const hot = b === 'attention';
+        rect(x + 25, 125 + i * 78, 180, 56, hot ? A : S2, 10);
+        text(x + 115, 160 + i * 78, b, hot ? A : S, 17, 'middle');
+      });
+    };
+    blocks(150, 'encoder');
+    blocks(560, 'decoder');
+    [0, 1, 2, 3, 4].forEach((k) => line(380, 153, 585, 125 + k * 14, k === 2 ? A : S2, k === 2 ? 2.5 : 1.5));
+    // RoPE: a vector rotated by position angle on a unit circle.
+    const cx = 1000, cy = 260, r = 120;
+    circ(cx, cy, r, S2);
+    line(cx - r - 20, cy, cx + r + 20, cy, S2, 1); line(cx, cy - r - 20, cx, cy + r + 20, S2, 1);
+    line(cx, cy, cx + r, cy, S, 3);
+    const th = 0.75; line(cx, cy, cx + r * Math.cos(th), cy - r * Math.sin(th), A, 3);
+    el.push(`<path d="M${cx + 50} ${cy} A 50 50 0 0 0 ${(cx + 50 * Math.cos(th)).toFixed(1)} ${(cy - 50 * Math.sin(th)).toFixed(1)}" fill="none" stroke="${A}" stroke-width="2"/>`);
+    text(cx + 62, cy - 18, 'm\u03b8', A, 20);
+    text(cx, cy + r + 50, 'rotary position', S, 17, 'middle');
+    break;
+  }
+  case 'nutri-ai': {
+    // A meal photographed, items detected, turned into an editable nutrition panel.
+    rect(90, 50, 300, 420, S, 32); circ(240, 80, 6, S2, S2);
+    circ(240, 270, 110, S, 'none', 2); circ(240, 270, 80, S2, 'none', 1.5);
+    rect(170, 205, 70, 60, A, 6); rect(250, 230, 70, 55, A, 6); rect(195, 290, 80, 45, A, 6);
+    el.push(`<path d="M420 270 C 500 270, 520 200, 600 200" fill="none" stroke="${A}" stroke-width="3" stroke-dasharray="2 10" stroke-linecap="round"/>`);
+    rect(600, 70, 520, 380, S, 18);
+    text(640, 120, 'dal, rice, sabzi', S, 22);
+    [['protein', 0.45], ['carbs', 0.8], ['fat', 0.3], ['fibre', 0.55]].forEach(([n, v], i) => {
+      const y = 170 + i * 62;
+      text(640, y + 18, String(n), S, 18);
+      rect(780, y, 290, 24, S2, 12);
+      rect(780, y, 290 * (v as number), 24, A, 12, i === 1 ? A : 'rgba(124,196,255,0.35)', 0);
+    });
+    text(640, 430, 'tap any row to edit', S2, 16);
+    break;
+  }
+  case 'rollout-allocation': {
+    // A reasoning tree: exploratory rollouts in grey, budget allocated where values disagree in blue.
+    const levels = [[{ x: 120, y: 260, hot: true }]];
+    for (let d = 1; d <= 4; d++) {
+      const prev = levels[d - 1], next: { x: number; y: number; hot: boolean }[] = [];
+      const n = prev.length * 2, x = 120 + d * 250;
+      prev.forEach((p, i) => [0, 1].forEach((k) => {
+        const idx = i * 2 + k, y = 40 + ((idx + 0.5) * 440) / n;
+        const hot = p.hot && (k === (d % 2) || (d === 2 && k === 0));
+        line(p.x, p.y, x, y, hot ? A : S2, hot ? 3 : 2);
+        next.push({ x, y, hot });
+      }));
+      levels.push(next);
+    }
+    levels.flat().forEach((n) => circ(n.x, n.y, 9, n.hot ? A : S, n.hot ? A : '#1a1c20'));
+    break;
+  }
+  case 'legal-precedent-retrieval': {
+    // A query judgment on the left, ranked candidate judgments on the right with relevance bars.
+    rect(80, 110, 230, 300, S); for (let i = 0; i < 9; i++) line(110, 150 + i * 28, 280 - (i % 3) * 30, 150 + i * 28, i === 3 || i === 4 ? A : S2, i === 3 || i === 4 ? 4 : 3);
+    for (let r = 0; r < 6; r++) {
+      const y = 60 + r * 70, hot = r < 3;
+      line(310, 260, 560, y + 25, hot ? A : S2, hot ? 2.5 : 1.5);
+      rect(560, y, 300, 50, hot ? A : S, 8);
+      for (let k = 0; k < 2; k++) line(580, y + 18 + k * 14, 760 - k * 50, y + 18 + k * 14, S2, 3);
+      const score = 0.95 - r * 0.14;
+      rect(900, y + 15, 220, 20, S2, 10);
+      rect(900, y + 15, 220 * score, 20, hot ? A : S2, 10, hot ? A : 'rgba(237,237,238,0.18)', 0);
+    }
+    break;
+  }
+  case 'network-file-system': {
+    // Clients, a naming server, storage servers; one server down with its replica taking over.
+    const ns = { x: 520, y: 260 };
+    [[120, 130], [120, 260], [120, 390]].forEach(([x, y]) => { rect(x - 50, y - 28, 100, 56, S, 10); text(x, y + 7, 'client', S, 18, 'middle'); line(x + 50, y, ns.x - 70, ns.y, S2); });
+    rect(ns.x - 70, ns.y - 45, 140, 90, A, 12); text(ns.x, ns.y + 7, 'naming', A, 20, 'middle');
+    const ss = [80, 175, 270, 365, 460];
+    ss.forEach((y, i) => {
+      const down = i === 2;
+      line(ns.x + 70, ns.y, 900, y, down ? S2 : S2, 2, down ? '6 8' : '');
+      rect(900, y - 30, 190, 60, down ? 'rgba(237,237,238,0.25)' : S, 10, 'none', 2);
+      text(995, y + 7, down ? 'ss3  down' : `ss${i + 1}`, down ? 'rgba(237,237,238,0.35)' : S, 18, 'middle');
+    });
+    el.push(`<path d="M1090 270 C 1160 270, 1160 365, 1090 365" fill="none" stroke="${A}" stroke-width="3"/>`);
+    text(1150, 410, 'replica takes over', A, 16, 'end');
+    break;
+  }
+  case 'iiit-mart': {
+    // Listings grid, one item moving through checkout to an OTP-verified handover.
+    for (let r = 0; r < 2; r++) for (let c = 0; c < 4; c++) {
+      const x = 70 + c * 170, y = 70 + r * 200, hot = r === 0 && c === 2;
+      rect(x, y, 140, 170, hot ? A : S, 12);
+      rect(x + 20, y + 20, 100, 80, S2, 8); line(x + 20, y + 125, x + 110, y + 125, S2, 4); line(x + 20, y + 145, x + 75, y + 145, hot ? A : S2, 4);
+    }
+    el.push(`<path d="M600 155 C 720 155, 760 260, 820 260" fill="none" stroke="${A}" stroke-width="3" stroke-dasharray="2 10" stroke-linecap="round"/>`);
+    rect(820, 190, 300, 140, A, 14);
+    [0, 1, 2, 3].forEach((i) => rect(850 + i * 65, 230, 50, 60, S, 8));
+    text(970, 370, 'verified handover', S, 18, 'middle');
+    break;
+  }
+  case 'teleprompter': {
+    // A phone with script lines scrolling past a reading band over the camera.
+    rect(470, 20, 260, 480, S, 34); circ(600, 50, 7, A, A);
+    for (let i = 0; i < 12; i++) {
+      const y = 90 + i * 34, w = 150 + ((i * 53) % 60);
+      const band = i === 5;
+      line(600 - w / 2, y, 600 + w / 2, y, band ? '#ededee' : 'rgba(237,237,238,' + (0.12 + 0.3 * (1 - Math.abs(i - 5) / 7)).toFixed(2) + ')', band ? 6 : 5);
+    }
+    rect(485, 255, 230, 40, A, 8, 'rgba(124,196,255,0.08)', 2);
+    line(800, 120, 800, 400, S2, 2); el.push(`<path d="M786 380 L800 400 L814 380" fill="none" stroke="${S2}" stroke-width="2"/>`);
+    break;
+  }
+  case 'wandermate': {
+    // A route optimised across stops on a map grid.
+    for (let x = 40; x < W; x += 60) line(x, 20, x, H - 20, 'rgba(237,237,238,0.06)', 1);
+    for (let y = 20; y < H; y += 60) line(40, y, W - 40, y, 'rgba(237,237,238,0.06)', 1);
+    const stops = [[140, 380], [330, 160], [560, 300], [780, 120], [1020, 330]];
+    el.push(`<path d="M${stops.map((p) => p.join(' ')).join(' L')}" fill="none" stroke="${A}" stroke-width="4" stroke-linejoin="round"/>`);
+    stops.forEach(([x, y], i) => { circ(x, y, 16, A, '#1a1c20', 3); text(x, y + 6, String(i + 1), A, 16, 'middle'); });
+    [[250, 420], [470, 90], [690, 430], [900, 230], [1120, 120]].forEach(([x, y]) => circ(x, y, 7, S2, 'none'));
+    break;
+  }
+  case 'operating-systems': {
+    // A terminal running the custom shell's own commands.
+    rect(120, 40, 960, 440, S, 16); line(120, 90, 1080, 90, S2); [0, 1, 2].forEach((i) => circ(155 + i * 26, 65, 7, S2));
+    const cmds = ['hop ~/projects', 'reveal -la', 'seek -f main.c', 'cat log | grep exit > out.txt', 'proclore', 'ping 4021 9'];
+    cmds.forEach((c, i) => { text(160, 145 + i * 52, '&lt;Sanyam@iiit:~&gt;', S2, 22); text(400, 145 + i * 52, c.replace(/&/g, '&amp;').replace(/>/g, '&gt;'), i === cmds.length - 1 ? A : S, 22); });
+    break;
+  }
+  case 'crowd-monitoring': {
+    // People detected in frame with bounding boxes, and a live count.
+    let n = 0;
+    for (let i = 0; i < 22; i++) {
+      const x = 80 + rnd() * 860, y = 90 + rnd() * 330;
+      circ(x, y, 9, S, S);
+      line(x, y + 10, x, y + 40, S, 3);
+      if (rnd() > 0.35) { rect(x - 24, y - 22, 48, 72, A, 4, 'none', 2); n++; }
+    }
+    rect(990, 60, 150, 110, A, 12); text(1065, 112, String(n), A, 44, 'middle'); text(1065, 148, 'people', S, 16, 'middle');
+    break;
+  }
+  case 'citiverse': {
+    // Entity tables linked by keys.
+    const tables = [[90, 70, 'cities'], [470, 40, 'hotels'], [470, 290, 'restaurants'], [860, 160, 'attractions']] as const;
+    line(320, 150, 470, 110, A, 2.5); line(320, 190, 470, 350, A, 2.5); line(700, 120, 860, 220, S2, 2); line(700, 350, 860, 260, S2, 2);
+    tables.forEach(([x, y, name]) => {
+      rect(x, y, 230, 190, S, 10); rect(x, y, 230, 44, S, 10, 'rgba(237,237,238,0.06)');
+      text(x + 18, y + 29, name, S, 19);
+      for (let k = 0; k < 4; k++) line(x + 18, y + 70 + k * 30, x + 110 + ((k * 37) % 80), y + 70 + k * 30, k === 0 ? A : S2, 4);
+    });
+    break;
+  }
+  default: text(60, 280, title, S, 40);
+}
+---
+<svg class="art" viewBox={`0 0 ${W} ${H}`} role="img" aria-label={`Illustration for ${title}`} preserveAspectRatio="xMidYMid meet" set:html={el.join('')} />
